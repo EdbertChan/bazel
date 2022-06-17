@@ -14,6 +14,7 @@
 package com.google.devtools.build.lib.buildtool;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.devtools.build.lib.util.ExitCode.PARSING_FAILURE;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -97,6 +98,8 @@ import com.google.devtools.build.lib.vfs.OutputService;
 import com.google.devtools.build.lib.vfs.Path;
 import com.google.devtools.build.lib.vfs.PathFragment;
 import com.google.devtools.build.lib.vfs.Root;
+import com.google.devtools.common.options.OptionsParsingException;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -876,12 +879,21 @@ public class ExecutionTool {
   }
 
   @VisibleForTesting
-  public static void configureResourceManager(ResourceManager resourceMgr, BuildRequest request) {
+  public static void configureResourceManager(ResourceManager resourceMgr, BuildRequest request)  throws AbruptExitException {
+
     ExecutionOptions options = request.getOptions(ExecutionOptions.class);
     ResourceSet resources;
     resources = ResourceSet.createWithRamCpu(options.localRamResources, options.localCpuResources);
     resourceMgr.setUseLocalMemoryEstimate(options.localMemoryEstimate);
-
+    try {
+      resourceMgr.setMnemonicResourceOverride(options.mnemonic_resource_override);
+    } catch (OptionsParsingException e) {
+      throw new AbruptExitException(
+              DetailedExitCode.of(PARSING_FAILURE,
+                      FailureDetail.newBuilder()
+                              .setMessage(e.getMessage())
+                              .build()));
+    }
     resourceMgr.setAvailableResources(
         ResourceSet.create(
             resources.getMemoryMb(),

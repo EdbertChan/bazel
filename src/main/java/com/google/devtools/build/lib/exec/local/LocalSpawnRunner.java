@@ -44,6 +44,7 @@ import com.google.devtools.build.lib.exec.SpawnSchedulingEvent;
 import com.google.devtools.build.lib.profiler.Profiler;
 import com.google.devtools.build.lib.profiler.ProfilerTask;
 import com.google.devtools.build.lib.profiler.SilentCloseable;
+import com.google.devtools.build.lib.runtime.CommandEnvironment;
 import com.google.devtools.build.lib.runtime.ProcessWrapper;
 import com.google.devtools.build.lib.server.FailureDetails;
 import com.google.devtools.build.lib.server.FailureDetails.FailureDetail;
@@ -136,7 +137,7 @@ public class LocalSpawnRunner implements SpawnRunner {
       ActionExecutionMetadata owner = spawn.getResourceOwner();
       context.report(SpawnSchedulingEvent.create(getName()));
       try (ResourceHandle handle =
-          resourceManager.acquireResources(owner, spawn.getLocalResources())) {
+          resourceManager.acquireResources(owner, spawn.getMnemonic(), spawn.getLocalResources())) {
         context.report(SpawnExecutingEvent.create(getName()));
         if (!localExecutionOptions.localLockfreeOutput) {
           context.lockOutputFiles();

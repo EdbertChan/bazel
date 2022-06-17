@@ -85,7 +85,7 @@ abstract class AbstractSandboxSpawnRunner implements SpawnRunner {
     ActionExecutionMetadata owner = spawn.getResourceOwner();
     context.report(SpawnSchedulingEvent.create(getName()));
     try (ResourceHandle ignored =
-        resourceManager.acquireResources(owner, spawn.getLocalResources())) {
+        resourceManager.acquireResources(owner, spawn.getMnemonic(), spawn.getLocalResources())) {
       context.report(SpawnExecutingEvent.create(getName()));
       SandboxedSpawn sandbox = prepareSpawn(spawn, context);
       return runSpawn(spawn, sandbox, context);
